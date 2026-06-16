@@ -8,3 +8,8 @@ dependencies = [
     "pyside6>=6.7",
     "psutil>=5.9",
 ]
+
+[dependency-groups]
+dev = [
+    "nuitka>=4.1.2",
+]

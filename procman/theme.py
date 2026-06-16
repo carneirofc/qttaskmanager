@@ -4,7 +4,7 @@ DARK = """
 /* ── Base ──────────────────────────────────────────────────────────────── */
 * {
     font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
-    font-size: 13px;
+    font-size: 14px;
 }
 QWidget {
     background-color: #202020;
@@ -55,7 +55,7 @@ QHeaderView::section {
     border-right: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding: 6px 10px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.3px;
     cursor: pointer;
@@ -208,7 +208,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: n
 QStatusBar {
     background: #181818;
     color: rgba(255, 255, 255, 0.38);
-    font-size: 11px;
+    font-size: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 0 4px;
 }
@@ -254,7 +254,7 @@ QGroupBox::title {
     color: rgba(255, 255, 255, 0.50);
     background: #202020;
     padding: 0 5px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.4px;
 }
@@ -275,7 +275,7 @@ QToolTip {
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 5px;
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 13px;
     opacity: 230;
 }
 
