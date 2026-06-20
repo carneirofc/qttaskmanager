@@ -50,6 +50,12 @@ class CollectorWorker(QObject):
             self._timer.stop()
         self._run()
 
+    def set_interval(self, ms: int) -> None:
+        """Change the refresh cadence live (invoked via queued signal)."""
+        self._interval_ms = max(200, int(ms))
+        if self._timer and self._timer.isActive():
+            self._timer.start(self._interval_ms)  # reschedule pending tick
+
     def shutdown(self) -> None:
         """Called before the thread is quit."""
         self._paused = True

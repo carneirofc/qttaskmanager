@@ -1,10 +1,11 @@
 """Main application window."""
 import psutil
 
-from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool, QSettings
+from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool
 from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QStatusBar, QPushButton, QMessageBox, QApplication,
+    QDialog,
 )
 
 from .collector import CollectorWorker
@@ -14,7 +15,9 @@ from .disk_tab import DiskCleanupTab
 from .registry_tab import RegistryTab
 from .links_tab import BrokenLinksTab
 from .appdata_tab import AppDataTab
-from .theme import stylesheet, THEMES, DEFAULT_THEME
+from .theme import stylesheet, THEMES
+from .settings import AppSettings
+from .settings_dialog import SettingsDialog
 
 
 class MainWindow(QMainWindow):
@@ -23,24 +26,28 @@ class MainWindow(QMainWindow):
     _sig_pause = Signal()
     _sig_resume = Signal()
     _sig_force_refresh = Signal()
+    _sig_set_interval = Signal(int)
     _sig_shutdown = Signal()
 
-    def __init__(self, interval_ms: int = 3000):
+    def __init__(self, interval_ms: int = 1000):
         super().__init__()
         self.setWindowTitle("Process Manager")
         self.resize(1300, 840)
 
-        # Theme is applied app-wide (so dialogs inherit it) and remembered
-        # across runs via QSettings.
-        self._settings = QSettings("QtProcMan", "QtProcMan")
-        self._theme_name = self._settings.value("theme", DEFAULT_THEME)
-        if self._theme_name not in THEMES:
-            self._theme_name = DEFAULT_THEME
+        # Persisted preferences (theme, refresh interval, geometry).
+        self._settings = AppSettings()
+        self._theme_name = self._settings.theme()
+        self._interval_ms = self._settings.interval_ms(default=interval_ms)
+        self._theme_actions: dict[str, QAction] = {}
         QApplication.instance().setStyleSheet(stylesheet(self._theme_name))
 
         self._build_ui()
         self._build_menubar()
-        self._start_worker(interval_ms)
+        self._start_worker(self._interval_ms)
+
+        geo = self._settings.geometry()
+        if geo:
+            self.restoreGeometry(geo)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
@@ -78,14 +85,27 @@ class MainWindow(QMainWindow):
         self._btn_pause.setCheckable(True)
         self._btn_pause.setFixedWidth(72)
         self._btn_pause.setCursor(Qt.PointingHandCursor)
-        self._btn_pause.setToolTip("Pause / resume automatic refresh (every 1 s)")
         self._btn_pause.clicked.connect(self._toggle_pause)
+        self._update_pause_tooltip()
 
         self.setStatusBar(self._status_label)
         self._status_label.addPermanentWidget(self._btn_pause)
 
+    def _update_pause_tooltip(self) -> None:
+        secs = self._interval_ms / 1000
+        self._btn_pause.setToolTip(f"Pause / resume automatic refresh (every {secs:g} s)")
+
     def _build_menubar(self) -> None:
         mb = self.menuBar()
+
+        file_menu = mb.addMenu("&File")
+        act_settings = QAction("&Settings…", self)
+        act_settings.triggered.connect(self._open_settings)
+        file_menu.addAction(act_settings)
+        file_menu.addSeparator()
+        act_exit = QAction("E&xit", self)
+        act_exit.triggered.connect(self.close)
+        file_menu.addAction(act_exit)
 
         tools = mb.addMenu("&Tools")
         for label, tab in (
@@ -112,6 +132,7 @@ class MainWindow(QMainWindow):
             act.triggered.connect(lambda _=False, n=name: self._apply_theme(n))
             group.addAction(act)
             theme_menu.addAction(act)
+            self._theme_actions[name] = act
 
         help_menu = mb.addMenu("&Help")
         act_about = QAction("&About", self)
@@ -129,7 +150,29 @@ class MainWindow(QMainWindow):
     def _apply_theme(self, name: str) -> None:
         self._theme_name = name
         QApplication.instance().setStyleSheet(stylesheet(name))
-        self._settings.setValue("theme", name)
+        self._settings.set_theme(name)
+        self._settings.sync()
+        act = self._theme_actions.get(name)   # keep View > Theme in sync
+        if act and not act.isChecked():
+            act.setChecked(True)
+
+    def _set_interval(self, ms: int) -> None:
+        self._interval_ms = ms
+        self._sig_set_interval.emit(ms)        # queued → collector thread
+        self._update_pause_tooltip()
+
+    def _open_settings(self) -> None:
+        dlg = SettingsDialog(self._settings, self)
+        if dlg.exec() != QDialog.Accepted:
+            return
+        theme = dlg.selected_theme()
+        interval = dlg.selected_interval_ms()
+        if theme != self._theme_name:
+            self._apply_theme(theme)
+        if interval != self._interval_ms:
+            self._settings.set_interval_ms(interval)
+            self._set_interval(interval)
+        self._settings.sync()
 
     def _about(self) -> None:
         QMessageBox.about(
@@ -155,6 +198,7 @@ class MainWindow(QMainWindow):
         self._sig_pause.connect(self._worker.pause)
         self._sig_resume.connect(self._worker.resume)
         self._sig_force_refresh.connect(self._worker.force_refresh)
+        self._sig_set_interval.connect(self._worker.set_interval)
         self._sig_shutdown.connect(self._worker.shutdown)
 
         self._thread.start()
@@ -246,6 +290,9 @@ class MainWindow(QMainWindow):
     # ── lifecycle ─────────────────────────────────────────────────────────────
 
     def closeEvent(self, event) -> None:
+        self._settings.set_geometry(self.saveGeometry())   # remember window size/pos
+        self._settings.sync()
+
         for tab in self._scan_tabs:       # signal any in-flight scan to stop
             tab.shutdown()
         QThreadPool.globalInstance().waitForDone(2000)
