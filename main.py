@@ -15,7 +15,7 @@ def main():
     icon = app_icon()
     app.setWindowIcon(icon)
 
-    win = MainWindow(interval_ms=3000)
+    win = MainWindow(interval_ms=1000)
     win.setWindowIcon(icon)
     win.show()
     sys.exit(app.exec())

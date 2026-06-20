@@ -101,25 +101,30 @@ class ProcessModel(QAbstractTableModel):
             self.endRemoveRows()
 
         # 2. Update in-place rows that changed.
-        # Collect the dirty range and emit ONE dataChanged for the whole span
-        # instead of one signal per row — the proxy re-sorts once, not N times.
+        # Collect contiguous dirty runs and emit one signal per run — avoids
+        # marking unchanged rows between first/last dirty row as stale.
         current_pids: set[int] = set()
-        first_dirty = len(self._data)
-        last_dirty = -1
+        dirty_runs: list[tuple[int, int]] = []
+        run_start = -1
+        nc = len(COLS) - 1
         for i, row in enumerate(self._data):
             current_pids.add(row["pid"])
             new = incoming_by_pid[row["pid"]]
             if row != new:
                 self._data[i] = new
-                first_dirty = min(first_dirty, i)
-                last_dirty = max(last_dirty, i)
+                if run_start < 0:
+                    run_start = i
+                run_end = i
+            else:
+                if run_start >= 0:
+                    dirty_runs.append((run_start, run_end))
+                    run_start = -1
+        if run_start >= 0:
+            dirty_runs.append((run_start, run_end))
 
-        if last_dirty >= 0:
-            self.dataChanged.emit(
-                self.index(first_dirty, 0),
-                self.index(last_dirty, len(COLS) - 1),
-                [Qt.DisplayRole, Qt.ForegroundRole],
-            )
+        roles = [Qt.DisplayRole, Qt.ForegroundRole]
+        for r0, r1 in dirty_runs:
+            self.dataChanged.emit(self.index(r0, 0), self.index(r1, nc), roles)
 
         # 3. Append brand-new PIDs at the end
         new_rows = [r for r in incoming if r["pid"] not in current_pids]

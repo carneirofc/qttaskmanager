@@ -17,4 +17,7 @@ def make_table(model) -> QTableView:
     t.setShowGrid(False)
     t.setEditTriggers(QAbstractItemView.NoEditTriggers)
     t.setWordWrap(False)
+    # Pixel-granular scrolling — smooth at high refresh rates
+    t.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+    t.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
     return t

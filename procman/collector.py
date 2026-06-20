@@ -55,6 +55,8 @@ class CollectorWorker(QObject):
         self._paused = True
         if self._timer:
             self._timer.stop()
+            self._timer.deleteLater()
+            self._timer = None
         if self._executor:
             self._executor.shutdown(wait=False, cancel_futures=True)
             self._executor = None

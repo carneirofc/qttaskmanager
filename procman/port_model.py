@@ -48,9 +48,35 @@ class PortModel(QAbstractTableModel):
         return None
 
     def load(self, rows: list[tuple]) -> None:
-        self.beginResetModel()
-        self._rows = rows
-        self.endResetModel()
+        old_len = len(self._rows)
+        new_len = len(rows)
+
+        # Overwrite overlapping range in-place
+        keep = min(old_len, new_len)
+        changed_top = -1
+        changed_bot = -1
+        for i in range(keep):
+            if self._rows[i] != rows[i]:
+                self._rows[i] = rows[i]
+                if changed_top < 0:
+                    changed_top = i
+                changed_bot = i
+
+        if changed_top >= 0:
+            self.dataChanged.emit(
+                self.index(changed_top, 0),
+                self.index(changed_bot, len(COLS) - 1),
+                [Qt.DisplayRole, Qt.ForegroundRole],
+            )
+
+        if old_len > new_len:
+            self.beginRemoveRows(QModelIndex(), new_len, old_len - 1)
+            del self._rows[new_len:]
+            self.endRemoveRows()
+        elif new_len > old_len:
+            self.beginInsertRows(QModelIndex(), old_len, new_len - 1)
+            self._rows.extend(rows[old_len:])
+            self.endInsertRows()
 
     def filter_pid(self, pid: int) -> list[tuple]:
         return [r for r in self._rows if r[0] == pid]

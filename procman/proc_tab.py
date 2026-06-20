@@ -43,15 +43,13 @@ class ProcessTab(QWidget):
     def on_data(self, procs: list[dict], conns: list[tuple]) -> None:
         """Called from main window when collector emits new data.
 
-        Model signals (dataChanged, beginInsertRows, etc.) are batched behind
-        setUpdatesEnabled so the view repaints exactly once per cycle.
-        No sort() call here — that emits layoutAboutToBeChanged/layoutChanged
-        which stalls the main thread every refresh. Sort order is stable;
-        user clicks a column header to change it.
+        Model update + re-sort both happen inside setUpdatesEnabled(False) so
+        the view issues exactly one repaint at the end, not one per signal.
         """
         self._proc_table.setUpdatesEnabled(False)
         try:
             self._proc_model.update(procs)
+            self._proxy.sort(self._proxy.sortColumn(), self._proxy.sortOrder())
         finally:
             self._proc_table.setUpdatesEnabled(True)
 
