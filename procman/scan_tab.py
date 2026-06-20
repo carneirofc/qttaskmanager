@@ -66,7 +66,8 @@ class ScanTab(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._model = ScanTableModel(self.columns())
+        self._cols = self.columns()
+        self._model = ScanTableModel(self._cols)
         self._proxy = ScanFilter()
         self._proxy.setSourceModel(self._model)
 
@@ -97,7 +98,11 @@ class ScanTab(QWidget):
         self._table = make_table(self._proxy)
         self._table.setContextMenuPolicy(Qt.CustomContextMenu)
         self._table.customContextMenuRequested.connect(self._context_menu)
-        self._table.horizontalHeader().setCursor(Qt.PointingHandCursor)
+        hdr = self._table.horizontalHeader()
+        hdr.setCursor(Qt.PointingHandCursor)
+        for i, spec in enumerate(self._cols):   # initial widths (last col stretches)
+            if spec.width:
+                hdr.resizeSection(i, spec.width)
         layout.addWidget(self._table)
 
     def _build_toolbar(self) -> QHBoxLayout:

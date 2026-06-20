@@ -12,15 +12,15 @@ from .disk_data import scan_disk_cleanup
 class DiskCleanupTab(ScanTab):
     def columns(self) -> list[ColumnSpec]:
         return [
-            ColumnSpec("Location", "name",   tooltip="Well-known cache / temp location"),
-            ColumnSpec("Path",     "path",   tooltip="Filesystem path"),
-            ColumnSpec("Size",     "size_h", align="R", tooltip="Total size on disk",
+            ColumnSpec("Location", "name", width=130, tooltip="Well-known cache / temp location"),
+            ColumnSpec("Path",     "path", width=240, tooltip="Filesystem path"),
+            ColumnSpec("Size",     "size_h", align="R", width=85, tooltip="Total size on disk",
                        sort_key="size_bytes"),
-            ColumnSpec("Files",    "file_count", align="R", tooltip="Number of files",
+            ColumnSpec("Files",    "file_count", align="R", width=70, tooltip="Number of files",
                        sort_key="file_count"),
-            ColumnSpec("Recommendation", "rec", colored=True,
+            ColumnSpec("Recommendation", "rec", colored=True, width=130,
                        tooltip="Suggested handling — review before deleting anything"),
-            ColumnSpec("Note",     "note",   tooltip="What this location holds"),
+            ColumnSpec("Note",     "note", tooltip="What this location holds"),  # stretches
         ]
 
     def scan_callable(self):

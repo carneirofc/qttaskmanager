@@ -37,6 +37,7 @@ class ColumnSpec(NamedTuple):
     tooltip: str = ""
     colored: bool = False       # tint this column by the row's severity
     sort_key: str | None = None  # dict key to sort by (defaults to `key`)
+    width: int = 0              # initial pixel width (0 = leave default)
 
 
 class ScanTableModel(QAbstractTableModel):

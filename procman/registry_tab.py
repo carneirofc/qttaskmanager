@@ -12,12 +12,12 @@ from .registry_data import scan_registry
 class RegistryScanTab(ScanTab):
     def columns(self) -> list[ColumnSpec]:
         return [
-            ColumnSpec("Category", "category", tooltip="Kind of registry entry"),
-            ColumnSpec("Hive",     "hive",     tooltip="Registry root / view"),
-            ColumnSpec("Name",     "name",     tooltip="Value or application name"),
-            ColumnSpec("Target",   "target",   tooltip="Path the entry points to"),
-            ColumnSpec("Issue",    "issue",    colored=True,
+            ColumnSpec("Category", "category", width=120, tooltip="Kind of registry entry"),
+            ColumnSpec("Hive",     "hive",     width=120, tooltip="Registry root / view"),
+            ColumnSpec("Name",     "name",     width=240, tooltip="Value or application name"),
+            ColumnSpec("Issue",    "issue",    colored=True, width=230,
                        tooltip="Why this entry is flagged"),
+            ColumnSpec("Target",   "target",   tooltip="Path the entry points to"),  # stretches
         ]
 
     def scan_callable(self):

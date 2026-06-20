@@ -9,10 +9,12 @@ from .links_data import scan_broken_links
 class BrokenLinksTab(ScanTab):
     def columns(self) -> list[ColumnSpec]:
         return [
-            ColumnSpec("Shortcut", "name",   tooltip="Shortcut display name"),
-            ColumnSpec("Location", "source", tooltip="Where the shortcut lives"),
-            ColumnSpec("Target",   "target", tooltip="Missing executable the shortcut points to"),
-            ColumnSpec("Status",   "status", colored=True, tooltip="Why this shortcut is flagged"),
+            ColumnSpec("Shortcut", "name",   width=240, tooltip="Shortcut display name"),
+            ColumnSpec("Location", "source", width=160, tooltip="Where the shortcut lives"),
+            ColumnSpec("Status",   "status", colored=True, width=130,
+                       tooltip="Why this shortcut is flagged"),
+            ColumnSpec("Target",   "target",
+                       tooltip="Missing executable the shortcut points to"),  # stretches
         ]
 
     def scan_callable(self):
