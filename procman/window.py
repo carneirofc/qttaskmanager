@@ -1,7 +1,8 @@
 """Main application window."""
 import psutil
 
-from PySide6.QtCore import QThread, Signal, Slot, Qt
+from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QStatusBar, QPushButton, QMessageBox,
 )
@@ -9,6 +10,9 @@ from PySide6.QtWidgets import (
 from .collector import CollectorWorker
 from .proc_tab import ProcessTab
 from .port_tab import ConnectionsTab
+from .disk_tab import DiskCleanupTab
+from .registry_tab import RegistryScanTab
+from .links_tab import BrokenLinksTab
 from .theme import DARK
 
 
@@ -27,6 +31,7 @@ class MainWindow(QMainWindow):
         self.setStyleSheet(DARK)
 
         self._build_ui()
+        self._build_menubar()
         self._start_worker(interval_ms)
 
     # ── UI ────────────────────────────────────────────────────────────────────
@@ -38,9 +43,18 @@ class MainWindow(QMainWindow):
         self._conn_tab = ConnectionsTab()
         self._pending_conns: list | None = None  # buffered while tab is hidden
 
+        # On-demand, read-only system scanners (no live feed — button driven).
+        self._disk_tab = DiskCleanupTab()
+        self._registry_tab = RegistryScanTab()
+        self._links_tab = BrokenLinksTab()
+        self._scan_tabs = (self._disk_tab, self._registry_tab, self._links_tab)
+
         self._tabs = QTabWidget()
         self._tabs.addTab(self._proc_tab, "Processes")
         self._tabs.addTab(self._conn_tab, "All Connections")
+        self._tabs.addTab(self._disk_tab, "Disk Cleanup")
+        self._tabs.addTab(self._registry_tab, "Registry")
+        self._tabs.addTab(self._links_tab, "Broken Links")
         self._tabs.currentChanged.connect(self._on_tab_changed)
         self._tabs.tabBar().setCursor(Qt.PointingHandCursor)
         self.setCentralWidget(self._tabs)
@@ -52,11 +66,51 @@ class MainWindow(QMainWindow):
         self._btn_pause.setCheckable(True)
         self._btn_pause.setFixedWidth(72)
         self._btn_pause.setCursor(Qt.PointingHandCursor)
-        self._btn_pause.setToolTip("Pause / resume automatic refresh (every 3 s)")
+        self._btn_pause.setToolTip("Pause / resume automatic refresh (every 1 s)")
         self._btn_pause.clicked.connect(self._toggle_pause)
 
         self.setStatusBar(self._status_label)
         self._status_label.addPermanentWidget(self._btn_pause)
+
+    def _build_menubar(self) -> None:
+        mb = self.menuBar()
+
+        tools = mb.addMenu("&Tools")
+        for label, tab in (
+            ("Scan &Disk Cleanup", self._disk_tab),
+            ("Scan &Registry",     self._registry_tab),
+            ("Scan Broken &Links", self._links_tab),
+        ):
+            act = QAction(label, self)
+            act.triggered.connect(lambda _=False, t=tab: self._show_and_scan(t))
+            tools.addAction(act)
+        tools.addSeparator()
+        act_all = QAction("Run &All Scans", self)
+        act_all.triggered.connect(self._run_all_scans)
+        tools.addAction(act_all)
+
+        help_menu = mb.addMenu("&Help")
+        act_about = QAction("&About", self)
+        act_about.triggered.connect(self._about)
+        help_menu.addAction(act_about)
+
+    def _show_and_scan(self, tab) -> None:
+        self._tabs.setCurrentWidget(tab)
+        tab.run_scan()
+
+    def _run_all_scans(self) -> None:
+        for tab in self._scan_tabs:
+            tab.run_scan()  # all run concurrently on the global thread pool
+
+    def _about(self) -> None:
+        QMessageBox.about(
+            self, "About Process Manager",
+            "<b>Process Manager</b><br>"
+            "Live processes &amp; network connections, plus read-only system "
+            "scanners for disk cleanup, registry hygiene and broken shortcuts."
+            "<br><br>The scanners never modify or delete anything — they only "
+            "report what you may want to review.",
+        )
 
     # ── worker thread ─────────────────────────────────────────────────────────
 
@@ -66,6 +120,7 @@ class MainWindow(QMainWindow):
         self._worker.moveToThread(self._thread)
 
         self._thread.started.connect(self._worker.start)
+        self._thread.finished.connect(self._worker.deleteLater)
         self._worker.data_ready.connect(self._on_data)
 
         self._sig_pause.connect(self._worker.pause)
@@ -162,6 +217,10 @@ class MainWindow(QMainWindow):
     # ── lifecycle ─────────────────────────────────────────────────────────────
 
     def closeEvent(self, event) -> None:
+        for tab in self._scan_tabs:       # signal any in-flight scan to stop
+            tab.shutdown()
+        QThreadPool.globalInstance().waitForDone(2000)
+
         self._sig_shutdown.emit()  # shuts down subprocess pool + timer
         self._thread.quit()
         self._thread.wait(3000)

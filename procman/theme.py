@@ -58,7 +58,6 @@ QHeaderView::section {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.3px;
-    cursor: pointer;
 }
 QHeaderView::section:hover {
     background: rgba(255, 255, 255, 0.05);
@@ -81,7 +80,6 @@ QPushButton {
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 6px;
     padding: 6px 18px;
-    cursor: pointer;
     min-width: 60px;
 }
 QPushButton:hover {
@@ -142,7 +140,6 @@ QTabBar::tab {
     border: none;
     border-bottom: 2px solid transparent;
     margin-bottom: 0;
-    cursor: pointer;
 }
 QTabBar::tab:selected {
     color: #ffffff;
@@ -282,4 +279,43 @@ QToolTip {
 /* ── MessageBox ──────────────────────────────────────────────────────────── */
 QMessageBox { background: #2b2b2b; }
 QMessageBox QLabel { color: #ffffff; background: transparent; }
+
+/* ── MenuBar ─────────────────────────────────────────────────────────────── */
+QMenuBar {
+    background: #1a1a1a;
+    color: rgba(255, 255, 255, 0.75);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 2px 4px;
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 5px;
+    margin: 1px 1px;
+}
+QMenuBar::item:selected { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+QMenuBar::item:pressed  { background: rgba(0, 120, 212, 0.30); color: #ffffff; }
+
+/* ── ProgressBar ─────────────────────────────────────────────────────────── */
+QProgressBar {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 6px;
+    max-height: 6px;
+    text-align: center;
+}
+QProgressBar::chunk {
+    background: #0078d4;
+    border-radius: 6px;
+}
+
+/* ── Read-only scan banner ───────────────────────────────────────────────── */
+QLabel#scanBanner {
+    background: rgba(240, 160, 0, 0.10);
+    color: #f0a000;
+    border: 1px solid rgba(240, 160, 0, 0.30);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+}
 """
