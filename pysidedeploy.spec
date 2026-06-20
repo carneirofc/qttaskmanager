@@ -68,7 +68,7 @@ macos.permissions =
 mode = onefile
 
 # specify any extra nuitka arguments
-extra_args = --quiet --noinclude-qt-translations --windows-disable-console
+extra_args = --quiet --noinclude-qt-translations --windows-disable-console --include-package-data=procman
 
 [buildozer]
 
