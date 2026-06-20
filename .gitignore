@@ -8,3 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Build artifacts
+build.log
+deployment/
+*.build/
+*.dist/
+*.onefile-build/

@@ -61,6 +61,11 @@ if (-not $SkipIcon) {
 }
 
 Write-Step "Building executable (pyside6-deploy)"
+# pyside6-deploy copies the onefile exe into exec_directory (dist) but does not
+# create that directory — ensure it exists, notably after -Clean removed it.
+$execDir = Join-Path $PSScriptRoot 'dist'
+if (-not (Test-Path $execDir)) { New-Item -ItemType Directory -Path $execDir | Out-Null }
+
 & uv run pyside6-deploy --force -c pysidedeploy.spec
 if ($LASTEXITCODE -ne 0) { throw "pyside6-deploy failed (exit $LASTEXITCODE)" }
 
@@ -68,5 +73,7 @@ $exe = Join-Path $PSScriptRoot 'dist\QtProcMan.exe'
 if (Test-Path $exe) {
     Write-Step "Done: $exe"
 } else {
-    Write-Step "Done. Check .\dist for output."
+    # pyside6-deploy can exit 0 even when the underlying Nuitka compile fails,
+    # so verify the artifact actually exists rather than trusting the exit code.
+    throw "Build finished but $exe was not produced — the Nuitka compile likely failed; check the log above."
 }
