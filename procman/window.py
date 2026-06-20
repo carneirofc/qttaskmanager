@@ -1,10 +1,10 @@
 """Main application window."""
 import psutil
 
-from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool
-from PySide6.QtGui import QAction
+from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool, QSettings
+from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import (
-    QMainWindow, QTabWidget, QStatusBar, QPushButton, QMessageBox,
+    QMainWindow, QTabWidget, QStatusBar, QPushButton, QMessageBox, QApplication,
 )
 
 from .collector import CollectorWorker
@@ -13,7 +13,7 @@ from .port_tab import ConnectionsTab
 from .disk_tab import DiskCleanupTab
 from .registry_tab import RegistryScanTab
 from .links_tab import BrokenLinksTab
-from .theme import DARK
+from .theme import stylesheet, THEMES, DEFAULT_THEME
 
 
 class MainWindow(QMainWindow):
@@ -28,7 +28,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Process Manager")
         self.resize(1300, 840)
-        self.setStyleSheet(DARK)
+
+        # Theme is applied app-wide (so dialogs inherit it) and remembered
+        # across runs via QSettings.
+        self._settings = QSettings("QtProcMan", "QtProcMan")
+        self._theme_name = self._settings.value("theme", DEFAULT_THEME)
+        if self._theme_name not in THEMES:
+            self._theme_name = DEFAULT_THEME
+        QApplication.instance().setStyleSheet(stylesheet(self._theme_name))
 
         self._build_ui()
         self._build_menubar()
@@ -89,6 +96,17 @@ class MainWindow(QMainWindow):
         act_all.triggered.connect(self._run_all_scans)
         tools.addAction(act_all)
 
+        view = mb.addMenu("&View")
+        theme_menu = view.addMenu("&Theme")
+        group = QActionGroup(self)
+        group.setExclusive(True)
+        for name in THEMES:
+            act = QAction(name, self, checkable=True)
+            act.setChecked(name == self._theme_name)
+            act.triggered.connect(lambda _=False, n=name: self._apply_theme(n))
+            group.addAction(act)
+            theme_menu.addAction(act)
+
         help_menu = mb.addMenu("&Help")
         act_about = QAction("&About", self)
         act_about.triggered.connect(self._about)
@@ -101,6 +119,11 @@ class MainWindow(QMainWindow):
     def _run_all_scans(self) -> None:
         for tab in self._scan_tabs:
             tab.run_scan()  # all run concurrently on the global thread pool
+
+    def _apply_theme(self, name: str) -> None:
+        self._theme_name = name
+        QApplication.instance().setStyleSheet(stylesheet(name))
+        self._settings.setValue("theme", name)
 
     def _about(self) -> None:
         QMessageBox.about(

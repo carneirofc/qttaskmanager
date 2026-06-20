@@ -12,8 +12,6 @@ from PySide6.QtWidgets import (
     QLabel, QTextEdit, QPushButton, QGroupBox, QSizePolicy,
 )
 
-from .theme import DARK
-
 
 def _label(text: str, selectable: bool = True) -> QLabel:
     lbl = QLabel(text)
@@ -35,7 +33,6 @@ class ProcessDetailDialog(QDialog):
         self.setWindowTitle(f"{proc['name']}  ·  PID {proc['pid']}")
         self.resize(760, 560)
         self.setMinimumSize(560, 380)
-        self.setStyleSheet(DARK)
         self._build_ui()
 
     def _build_ui(self) -> None:
