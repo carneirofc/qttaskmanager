@@ -11,7 +11,7 @@ from .collector import CollectorWorker
 from .proc_tab import ProcessTab
 from .port_tab import ConnectionsTab
 from .disk_tab import DiskCleanupTab
-from .registry_tab import RegistryScanTab
+from .registry_tab import RegistryTab
 from .links_tab import BrokenLinksTab
 from .appdata_tab import AppDataTab
 from .theme import stylesheet, THEMES, DEFAULT_THEME
@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         # On-demand, read-only system scanners (no live feed — button driven).
         self._disk_tab = DiskCleanupTab()
         self._appdata_tab = AppDataTab()
-        self._registry_tab = RegistryScanTab()
+        self._registry_tab = RegistryTab()
         self._links_tab = BrokenLinksTab()
         self._scan_tabs = (
             self._disk_tab, self._appdata_tab, self._registry_tab, self._links_tab,
