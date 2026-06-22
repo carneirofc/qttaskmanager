@@ -1,7 +1,7 @@
 [app]
 
 # title of your application
-title = QtProcMan
+title = QtTaskManager
 
 # project root directory. default = The parent directory of input_file
 project_dir = .
@@ -16,12 +16,12 @@ exec_directory = dist
 project_file = 
 
 # application icon
-icon = C:\Users\claud\__Code__\qtprocman\app.ico
+icon = app.ico
 
 [python]
 
 # python path
-python_path = C:\Users\claud\__Code__\qtprocman\.venv\Scripts\python.exe
+python_path = .venv/Scripts/python.exe
 
 # python packages to install
 packages = 

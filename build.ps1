@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Build the QtProcMan standalone executable with Nuitka (via pyside6-deploy).
+    Build the QtTaskManager standalone executable with Nuitka (via pyside6-deploy).
 
 .DESCRIPTION
     Steps:
@@ -69,7 +69,7 @@ if (-not (Test-Path $execDir)) { New-Item -ItemType Directory -Path $execDir | O
 & uv run pyside6-deploy --force -c pysidedeploy.spec
 if ($LASTEXITCODE -ne 0) { throw "pyside6-deploy failed (exit $LASTEXITCODE)" }
 
-$exe = Join-Path $PSScriptRoot 'dist\QtProcMan.exe'
+$exe = Join-Path $PSScriptRoot 'dist\QtTaskManager.exe'
 if (Test-Path $exe) {
     Write-Step "Done: $exe"
 } else {
