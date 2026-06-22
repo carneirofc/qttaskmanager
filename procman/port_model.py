@@ -1,5 +1,5 @@
 """Connection/port table model."""
-from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, QSortFilterProxyModel
+from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PySide6.QtGui import QColor
 
 from .proc_model import AnyColumnFilter

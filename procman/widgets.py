@@ -1,6 +1,5 @@
 """Shared widget helpers."""
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QTableView, QAbstractItemView, QHeaderView
+from PySide6.QtWidgets import QTableView, QAbstractItemView
 
 
 def make_table(model) -> QTableView:

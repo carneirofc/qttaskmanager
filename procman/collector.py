@@ -6,7 +6,7 @@ Thread model:
   Worker QThread ── blocks on future.result() while subprocess collects
   Subprocess ── psutil runs here; completely separate GIL
 """
-from concurrent.futures import ProcessPoolExecutor, Future
+from concurrent.futures import ProcessPoolExecutor
 from PySide6.QtCore import QObject, QTimer, Signal
 
 from .data import collect_all

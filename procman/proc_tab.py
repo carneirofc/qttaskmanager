@@ -1,11 +1,10 @@
 """Process tab: table + per-process connection detail + controls."""
-import psutil
 
-from PySide6.QtCore import Qt, Signal, QModelIndex
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QSplitter, QMenu, QMessageBox,
+    QSplitter, QMenu,
 )
 
 from .proc_model import ProcessModel, AnyColumnFilter, COL_IDX

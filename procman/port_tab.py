@@ -1,5 +1,4 @@
 """All-connections tab."""
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel
 
 from .port_model import PortModel, make_filtered_port_model
