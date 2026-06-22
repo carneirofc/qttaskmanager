@@ -1,7 +1,7 @@
 [project]
-name = "qtprocman"
+name = "qttaskmanager"
 version = "0.1.0"
-description = "Add your description here"
+description = "Qt task manager — live processes, connections and read-only system scanners"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

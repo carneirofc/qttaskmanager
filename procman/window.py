@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, interval_ms: int = 1000):
         super().__init__()
-        self.setWindowTitle("Process Manager")
+        self.setWindowTitle("Qt Task Manager")
         self.resize(1300, 840)
 
         # Persisted preferences (theme, refresh interval, geometry).
@@ -176,12 +176,15 @@ class MainWindow(QMainWindow):
 
     def _about(self) -> None:
         QMessageBox.about(
-            self, "About Process Manager",
-            "<b>Process Manager</b><br>"
+            self, "About Qt Task Manager",
+            "<b>Qt Task Manager</b><br>"
             "Live processes &amp; network connections, plus read-only system "
             "scanners for disk cleanup, registry hygiene and broken shortcuts."
             "<br><br>The scanners never modify or delete anything — they only "
-            "report what you may want to review.",
+            "report what you may want to review."
+            "<br><br>Author: carneirofc<br>"
+            'Repository: <a href="https://github.com/carneirofc/qttaskmanager">'
+            "github.com/carneirofc/qttaskmanager</a>",
         )
 
     # ── worker thread ─────────────────────────────────────────────────────────

@@ -79,7 +79,7 @@ wheels = [
 ]
 
 [[package]]
-name = "qtprocman"
+name = "qttaskmanager"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
