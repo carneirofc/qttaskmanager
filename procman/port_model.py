@@ -2,7 +2,7 @@
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PySide6.QtGui import QColor
 
-from .proc_model import AnyColumnFilter
+from .proc_model import AnyColumnFilter, SORT_ROLE
 
 COLS = ["PID", "Name", "Local Addr", "Remote Addr", "State", "Family"]
 _STATE_COL = COLS.index("State")
@@ -41,6 +41,9 @@ class PortModel(QAbstractTableModel):
 
         if role == Qt.DisplayRole:
             return str(val)
+
+        if role == SORT_ROLE:
+            return val if isinstance(val, (int, float)) else str(val).lower()
 
         if role == Qt.ForegroundRole and col == _STATE_COL:
             return _STATE_COLOR.get(str(val).lower(), _DEFAULT_FG)

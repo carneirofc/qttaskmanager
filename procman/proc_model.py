@@ -6,6 +6,10 @@ COLS    = ["PID", "Name", "CPU %", "Mem MB", "Threads", "Status", "User", "Ports
 COL_KEY = ["pid", "name", "cpu",  "mem_mb", "threads", "status", "user", "ports", "cmdline"]
 COL_IDX = {name: i for i, name in enumerate(COLS)}
 
+# Custom role so numeric columns sort numerically while the proxy still filters
+# against DisplayRole text.
+SORT_ROLE = Qt.UserRole + 1
+
 _COL_TIPS = {
     "PID":     "Process ID — unique identifier assigned by the OS",
     "Name":    "Executable filename",
@@ -71,6 +75,9 @@ class ProcessModel(QAbstractTableModel):
             if key == "mem_mb":
                 return f"{val:.1f}"
             return str(val)
+
+        if role == SORT_ROLE:
+            return val if isinstance(val, (int, float)) else str(val).lower()
 
         if role == Qt.ForegroundRole:
             if key == "status":
@@ -148,7 +155,14 @@ class ProcessModel(QAbstractTableModel):
 
 
 class AnyColumnFilter(QSortFilterProxyModel):
-    """Filter that matches against all columns, not just one."""
+    """Filter that matches against all columns, not just one.
+
+    Sorts via SORT_ROLE so numeric columns compare as numbers, not strings.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setSortRole(SORT_ROLE)
 
     def filterAcceptsRow(self, src_row: int, src_parent: QModelIndex) -> bool:
         rx = self.filterRegularExpression()
