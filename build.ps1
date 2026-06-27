@@ -66,8 +66,18 @@ Write-Step "Building executable (pyside6-deploy)"
 $execDir = Join-Path $PSScriptRoot 'dist'
 if (-not (Test-Path $execDir)) { New-Item -ItemType Directory -Path $execDir | Out-Null }
 
-& uv run pyside6-deploy --force -c pysidedeploy.spec
-if ($LASTEXITCODE -ne 0) { throw "pyside6-deploy failed (exit $LASTEXITCODE)" }
+# pyside6-deploy rewrites pysidedeploy.spec in place, baking the absolute,
+# machine-specific python_path into the tracked file. Snapshot the exact bytes
+# and restore them afterwards so a local build never leaves user-specific data
+# (usernames, absolute paths) to be accidentally committed.
+$specPath = Join-Path $PSScriptRoot 'pysidedeploy.spec'
+$specBytes = [System.IO.File]::ReadAllBytes($specPath)
+try {
+    & uv run pyside6-deploy --force -c pysidedeploy.spec
+    if ($LASTEXITCODE -ne 0) { throw "pyside6-deploy failed (exit $LASTEXITCODE)" }
+} finally {
+    [System.IO.File]::WriteAllBytes($specPath, $specBytes)
+}
 
 $exe = Join-Path $PSScriptRoot 'dist\QtTaskManager.exe'
 if (Test-Path $exe) {
