@@ -18,6 +18,7 @@ from .appdata_tab import AppDataTab
 from .theme import stylesheet, THEMES
 from .settings import AppSettings
 from .settings_dialog import SettingsDialog
+from . import version
 
 
 class MainWindow(QMainWindow):
@@ -182,6 +183,9 @@ class MainWindow(QMainWindow):
         QMessageBox.about(
             self, "About Qt Task Manager",
             "<b>Qt Task Manager</b><br>"
+            f"Version {version.version()} "
+            f"(commit {version.commit()}, built {version.build_date()})"
+            "<br><br>"
             "Live processes &amp; network connections, plus read-only system "
             "scanners for disk cleanup, registry hygiene and broken shortcuts."
             "<br><br>The scanners never modify or delete anything — they only "

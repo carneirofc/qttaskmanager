@@ -15,3 +15,6 @@ deployment/
 *.build/
 *.dist/
 *.onefile-build/
+
+# Build-time provenance baked in by build.ps1
+procman/_build_info.py
