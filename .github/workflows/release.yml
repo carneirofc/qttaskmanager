@@ -33,10 +33,13 @@ jobs:
           key: nuitka-${{ runner.os }}-${{ hashFiles('uv.lock') }}
           restore-keys: nuitka-${{ runner.os }}-
 
-      - name: Build Windows executable
-        run: pwsh -File build.ps1 -SkipIcon
+      # Inno Setup is preinstalled on the windows-latest image (ISCC on PATH),
+      # so -Installer produces dist\QtTaskManager-Setup-<version>.exe alongside
+      # the bare onefile exe.
+      - name: Build Windows executable and installer
+        run: pwsh -File build.ps1 -SkipIcon -Installer
 
-      - name: Draft release with the exe attached
+      - name: Draft release with the exe and installer attached
         uses: softprops/action-gh-release@v3
         with:
           draft: true

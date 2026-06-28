@@ -16,14 +16,21 @@
 .PARAMETER Clean
     Remove previous build artifacts (dist, build, *.build, *.dist, *.onefile-build) first.
 
+.PARAMETER Installer
+    After building the exe, run Inno Setup (iscc) on installer.iss to produce
+    dist\QtTaskManager-Setup-<version>.exe. Requires Inno Setup 6 on PATH (or at
+    its default install location).
+
 .EXAMPLE
     .\build.ps1
     .\build.ps1 -Clean
+    .\build.ps1 -Installer
 #>
 [CmdletBinding()]
 param(
     [switch]$SkipIcon,
-    [switch]$Clean
+    [switch]$Clean,
+    [switch]$Installer
 )
 
 $ErrorActionPreference = 'Stop'
@@ -86,4 +93,36 @@ if (Test-Path $exe) {
     # pyside6-deploy can exit 0 even when the underlying Nuitka compile fails,
     # so verify the artifact actually exists rather than trusting the exit code.
     throw "Build finished but $exe was not produced — the Nuitka compile likely failed; check the log above."
+}
+
+if ($Installer) {
+    Write-Step "Building installer (Inno Setup)"
+
+    # Resolve iscc: PATH first, then the standard Inno Setup 6 install locations.
+    $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
+    if (-not $iscc) {
+        $candidates = @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+            "$env:LocalAppData\Programs\Inno Setup 6\ISCC.exe"
+        )
+        $iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    }
+    if (-not $iscc) {
+        throw "Inno Setup (iscc) not found. Install from https://jrsoftware.org/isdl.php (or 'winget install JRSoftware.InnoSetup')."
+    }
+
+    # Keep the installer version in sync with pyproject.toml.
+    $version = (Select-String -Path (Join-Path $PSScriptRoot 'pyproject.toml') -Pattern '^\s*version\s*=\s*"([^"]+)"').Matches[0].Groups[1].Value
+    if (-not $version) { throw "Could not read version from pyproject.toml" }
+
+    & $iscc "/DAppVersion=$version" (Join-Path $PSScriptRoot 'installer.iss')
+    if ($LASTEXITCODE -ne 0) { throw "iscc failed (exit $LASTEXITCODE)" }
+
+    $setup = Join-Path $PSScriptRoot "dist\QtTaskManager-Setup-$version.exe"
+    if (Test-Path $setup) {
+        Write-Step "Done: $setup"
+    } else {
+        throw "iscc reported success but $setup was not produced — check the log above."
+    }
 }
