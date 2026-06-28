@@ -1,7 +1,7 @@
 """Main application window."""
 import psutil
 
-from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool
+from PySide6.QtCore import QThread, Signal, Slot, Qt, QThreadPool, QTimer
 from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QStatusBar, QPushButton, QMessageBox, QApplication,
@@ -48,6 +48,10 @@ class MainWindow(QMainWindow):
         geo = self._settings.geometry()
         if geo:
             self.restoreGeometry(geo)
+
+        # Kick off every read-only scan once the event loop is running so the
+        # window paints first and the scans run in the background thread pool.
+        QTimer.singleShot(0, self._run_all_scans)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
