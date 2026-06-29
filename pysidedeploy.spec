@@ -65,10 +65,10 @@ plugins =
 macos.permissions = 
 
 # mode of using nuitka. accepts standalone or onefile. default = onefile
-mode = onefile
+mode = standalone
 
 # specify any extra nuitka arguments
-extra_args = --quiet --assume-yes-for-downloads --noinclude-qt-translations --windows-console-mode=disable --include-package-data=procman
+extra_args = --quiet --assume-yes-for-downloads --noinclude-qt-translations --windows-console-mode=disable --include-package-data=procman --output-filename=QtTaskManager.exe
 
 [buildozer]
 

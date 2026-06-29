@@ -6,9 +6,10 @@
     Steps:
       1. Sync dependencies (incl. the 'dev' group that provides Nuitka) with uv.
       2. Regenerate app.ico from the programmatic icon.
-      3. Run pyside6-deploy using pysidedeploy.spec (onefile, no console).
+      3. Run pyside6-deploy using pysidedeploy.spec (standalone, no console).
 
-    Output executable lands in .\dist (per exec_directory in pysidedeploy.spec).
+    Output lands in .\dist\QtTaskManager.dist\ (the standalone folder; exe +
+    bundled Qt/Python runtime, per exec_directory in pysidedeploy.spec).
 
 .PARAMETER SkipIcon
     Skip regenerating app.ico.
@@ -104,7 +105,9 @@ try {
     if (Test-Path $buildInfoPath) { Remove-Item -Force $buildInfoPath }
 }
 
-$exe = Join-Path $PSScriptRoot 'dist\QtTaskManager.exe'
+# Standalone mode emits a folder (dist\QtTaskManager.dist) holding the exe plus
+# its Qt/Python runtime — launching from it skips the per-start onefile unpack.
+$exe = Join-Path $PSScriptRoot 'dist\QtTaskManager.dist\QtTaskManager.exe'
 if (Test-Path $exe) {
     Write-Step "Done: $exe"
 } else {

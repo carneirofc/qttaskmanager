@@ -1,8 +1,9 @@
 ; Inno Setup script for QtTaskManager.
 ;
-; Wraps the single onefile executable produced by pyside6-deploy/Nuitka
-; (dist\QtTaskManager.exe) into a per-user setup.exe with Start Menu /
-; optional desktop shortcuts and an uninstaller.
+; Wraps the standalone folder produced by pyside6-deploy/Nuitka
+; (dist\QtTaskManager.dist\, exe + Qt/Python runtime) into a per-user setup.exe
+; with Start Menu / optional desktop shortcuts and an uninstaller. Standalone
+; (vs onefile) avoids unpacking to %TEMP% on every launch, so the app starts faster.
 ;
 ; Build:  iscc /DAppVersion=0.1.0 installer.iss
 ; (build.ps1 -Installer passes the version read from pyproject.toml.)
@@ -51,7 +52,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "dist\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+; Recursively install the whole standalone folder; {#AppExeName} lands at {app} root.
+Source: "dist\QtTaskManager.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
