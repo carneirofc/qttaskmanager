@@ -15,6 +15,7 @@ from .disk_tab import DiskCleanupTab
 from .registry_tab import RegistryTab
 from .links_tab import BrokenLinksTab
 from .appdata_tab import AppDataTab
+from .threat_tab import ThreatScanTab
 from .theme import stylesheet, THEMES
 from .settings import AppSettings
 from .settings_dialog import SettingsDialog
@@ -64,17 +65,20 @@ class MainWindow(QMainWindow):
         self._pending_conns: list | None = None  # buffered while tab is hidden
 
         # On-demand, read-only system scanners (no live feed — button driven).
+        self._threat_tab = ThreatScanTab()
         self._disk_tab = DiskCleanupTab()
         self._appdata_tab = AppDataTab()
         self._registry_tab = RegistryTab()
         self._links_tab = BrokenLinksTab()
         self._scan_tabs = (
-            self._disk_tab, self._appdata_tab, self._registry_tab, self._links_tab,
+            self._threat_tab, self._disk_tab, self._appdata_tab,
+            self._registry_tab, self._links_tab,
         )
 
         self._tabs = QTabWidget()
         self._tabs.addTab(self._proc_tab, "Processes")
         self._tabs.addTab(self._conn_tab, "All Connections")
+        self._tabs.addTab(self._threat_tab, "Threats")
         self._tabs.addTab(self._disk_tab, "Disk Cleanup")
         self._tabs.addTab(self._appdata_tab, "App Data")
         self._tabs.addTab(self._registry_tab, "Registry")
@@ -114,6 +118,7 @@ class MainWindow(QMainWindow):
 
         tools = mb.addMenu("&Tools")
         for label, tab in (
+            ("Scan &Threats",      self._threat_tab),
             ("Scan &Disk Cleanup", self._disk_tab),
             ("Scan &App Data",     self._appdata_tab),
             ("Scan &Registry",     self._registry_tab),
