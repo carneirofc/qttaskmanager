@@ -16,6 +16,7 @@ themeable Fluent-inspired UI.
 | --- | --- |
 | **Processes** | Live table — PID, name, CPU %, memory, threads, status, user, listening ports, full command line. Filter across every column, sort, multi-select, kill (single or batch), inspect details, open file location. Per-process connections shown in the panel below. |
 | **All Connections** | Live view of every inet connection — local/remote address, state, IPv4/IPv6 — with instant filtering. |
+| **Threats** | On-demand heuristic scan that scores running processes for signs of attack, data theft, persistence or coin-mining — weighing process metadata, command line, network connections, Authenticode signature and autostart entries into a 0–100 risk score with per-rule findings. Read-only: it flags, never kills. |
 | **Disk Cleanup** | Read-only sizes of dozens of well-known cache/temp locations — Windows temp & shader caches, Windows Update & servicing, crash dumps, every Chromium browser plus Firefox, comms apps (Teams/Discord/Slack/…), and developer caches (pip, npm, uv, Gradle, NuGet, Cargo, Go, …) — each with a *safe to clear* / *review first* recommendation. |
 | **App Data** | Browse per-application folders under Roaming, Local, LocalLow and ProgramData, sized and sorted — right-click → Open in Explorer. |
 | **Registry** | An **Explorer** for the registry locations where Windows records applications (Uninstall, App Paths, Run/RunOnce, Classes), plus an **Issues** scan that flags entries whose target is gone. |
